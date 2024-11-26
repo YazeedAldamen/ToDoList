@@ -1,0 +1,101 @@
+﻿@using ToDoList.Models.ToDoListModels;
+
+@model List<ToDoListItem>
+@{
+    Layout = "_Layout";
+}
+
+<h2>To Do List</h2>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <form id="addTaskForm" class="d-flex justify-content-between align-items-center w-100">
+        <div class="input-group">
+            <input type="text" name="title" id="taskTitle" class="form-control" placeholder="Enter task title" required />
+        </div>
+        <button type="submit" class="btn btn-primary ms-2 col-2">Add Task</button>
+    </form>
+</div>
+
+<br />
+<div id="todolist" class="container">
+    @Html.Partial("_ToDoListPartial", Model)
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    function toggleCompletion(id) {
+        fetch('/ToDoList/ToggleCompletion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(id)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to toggle completion");
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('todolist').innerHTML = html;
+            })
+            .catch(error => {
+                alert("Failed to toggle completion. Please try again.");
+            });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('addTaskForm');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const title = document.getElementById('taskTitle').value;
+
+            fetch('/ToDoList/AddTask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(title)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to add task");
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById('todolist').innerHTML = html;
+                    document.getElementById('taskTitle').value = '';
+                })
+                .catch(error => {
+                    alert("Failed to add the task. Please try again.");
+                });
+        });
+    });
+
+
+    function deleteTask(id) {
+        fetch('/ToDoList/DeleteTask', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(id)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to delete task");
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('todolist').innerHTML = html;
+            })
+            .catch(error => {
+                alert("Failed to delete the task. Please try again.");
+            });
+    }
+
+</script>
